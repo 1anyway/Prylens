@@ -2,35 +2,35 @@
 pragma solidity ^0.8.4;
 
 import "./utils/SoladyTest.sol";
-import {DN404, MockDN404} from "./utils/mocks/MockDN404.sol";
-import {DN404Mirror} from "../src/DN404Mirror.sol";
+import {SF404, MockSF404} from "./utils/mocks/MockSF404.sol";
+import {SF404Mirror} from "../src/SF404Mirror.sol";
 import {LibClone} from "solady/utils/LibClone.sol";
 import {LibSort} from "solady/utils/LibSort.sol";
 
-contract DN404Test is SoladyTest {
+contract SF404Test is SoladyTest {
     uint256 private constant _WAD = 1000000000000000000;
 
     address private constant _PERMIT2 = 0x000000000022D473030F116dDEE9F6B43aC78BA3;
 
-    MockDN404 dn;
-    DN404Mirror mirror;
+    MockSF404 dn;
+    SF404Mirror mirror;
 
     event SkipNFTSet(address indexed target, bool status);
 
     function setUp() public {
-        dn = new MockDN404();
-        mirror = new DN404Mirror(address(this));
+        dn = new MockSF404();
+        mirror = new SF404Mirror(address(this));
     }
 
     function testNameAndSymbol(string memory name, string memory symbol) public {
-        dn.initializeDN404(1000 * _WAD, address(this), address(mirror));
+        dn.initializeSF404(1000 * _WAD, address(this), address(mirror));
         dn.setNameAndSymbol(name, symbol);
         assertEq(mirror.name(), name);
         assertEq(mirror.symbol(), symbol);
     }
 
     function testTokenURI(string memory baseURI, uint256 id) public {
-        dn.initializeDN404(1000 * _WAD, address(this), address(mirror));
+        dn.initializeSF404(1000 * _WAD, address(this), address(mirror));
         dn.setBaseURI(baseURI);
         assertEq(mirror.tokenURI(id), string(abi.encodePacked(baseURI, id)));
     }
@@ -47,13 +47,13 @@ contract DN404Test is SoladyTest {
 
     function testInitialize(uint32 totalNFTSupply, address initialSupplyOwner) public {
         if (totalNFTSupply > 0 && initialSupplyOwner == address(0)) {
-            vm.expectRevert(DN404.TransferToZeroAddress.selector);
-            dn.initializeDN404(totalNFTSupply * _WAD, initialSupplyOwner, address(mirror));
+            vm.expectRevert(SF404.TransferToZeroAddress.selector);
+            dn.initializeSF404(totalNFTSupply * _WAD, initialSupplyOwner, address(mirror));
         } else if (uint256(totalNFTSupply) + 1 > type(uint32).max) {
-            vm.expectRevert(DN404.TotalSupplyOverflow.selector);
-            dn.initializeDN404(totalNFTSupply * _WAD, initialSupplyOwner, address(mirror));
+            vm.expectRevert(SF404.TotalSupplyOverflow.selector);
+            dn.initializeSF404(totalNFTSupply * _WAD, initialSupplyOwner, address(mirror));
         } else {
-            dn.initializeDN404(totalNFTSupply * _WAD, initialSupplyOwner, address(mirror));
+            dn.initializeSF404(totalNFTSupply * _WAD, initialSupplyOwner, address(mirror));
             assertEq(dn.totalSupply(), uint256(totalNFTSupply) * _WAD);
             assertEq(dn.balanceOf(initialSupplyOwner), uint256(totalNFTSupply) * _WAD);
             assertEq(mirror.totalSupply(), 0);
@@ -65,7 +65,7 @@ contract DN404Test is SoladyTest {
         address alice = address(111);
         address bob = address(222);
         totalNFTSupply = uint32(_bound(totalNFTSupply, 1, 5));
-        dn.initializeDN404(totalNFTSupply * _WAD, address(this), address(mirror));
+        dn.initializeSF404(totalNFTSupply * _WAD, address(this), address(mirror));
         dn.transfer(alice, _WAD * uint256(totalNFTSupply));
         for (uint256 t; t != 1; ++t) {
             uint256 id = _bound(r, 1, totalNFTSupply);
@@ -83,7 +83,7 @@ contract DN404Test is SoladyTest {
     function testSetAndGetOperatorApprovals(address owner, address operator, bool approved)
         public
     {
-        dn.initializeDN404(1000 * _WAD, address(this), address(mirror));
+        dn.initializeSF404(1000 * _WAD, address(this), address(mirror));
         assertEq(mirror.isApprovedForAll(owner, operator), false);
         vm.prank(owner);
         mirror.setApprovalForAll(operator, approved);
@@ -95,12 +95,12 @@ contract DN404Test is SoladyTest {
         vm.assume(recipient.code.length == 0);
         vm.assume(recipient != address(0));
 
-        dn.initializeDN404(totalNFTSupply * _WAD, address(this), address(mirror));
+        dn.initializeSF404(totalNFTSupply * _WAD, address(this), address(mirror));
 
         assertEq(dn.totalSupply(), totalNFTSupply * _WAD);
         assertEq(mirror.totalSupply(), 0);
 
-        vm.expectRevert(DN404.TokenDoesNotExist.selector);
+        vm.expectRevert(SF404.TokenDoesNotExist.selector);
         mirror.getApproved(1);
 
         dn.transfer(recipient, _WAD);
@@ -121,16 +121,16 @@ contract DN404Test is SoladyTest {
         vm.prank(recipient);
         dn.transfer(address(42069), totalNFTSupply + 1);
 
-        mirror = DN404Mirror(payable(dn.mirrorERC721()));
+        mirror = SF404Mirror(payable(dn.mirrorERC721()));
 
-        vm.expectRevert(DN404.TokenDoesNotExist.selector);
+        vm.expectRevert(SF404.TokenDoesNotExist.selector);
         mirror.ownerOf(1);
     }
 
     function testMintAndBurn() public {
         address initialSupplyOwner = address(1111);
 
-        dn.initializeDN404(0, initialSupplyOwner, address(mirror));
+        dn.initializeSF404(0, initialSupplyOwner, address(mirror));
         assertEq(dn.getSkipNFT(initialSupplyOwner), false);
         assertEq(dn.getSkipNFT(address(this)), true);
 
@@ -163,7 +163,7 @@ contract DN404Test is SoladyTest {
     function testMintAndBurn2() public {
         address initialSupplyOwner = address(1111);
 
-        dn.initializeDN404(0, initialSupplyOwner, address(mirror));
+        dn.initializeSF404(0, initialSupplyOwner, address(mirror));
         assertEq(dn.getSkipNFT(initialSupplyOwner), false);
         assertEq(dn.getSkipNFT(address(this)), true);
 
@@ -231,7 +231,7 @@ contract DN404Test is SoladyTest {
         address alice = address(111);
         address bob = address(222);
 
-        dn.initializeDN404(10 * _WAD, initialSupplyOwner, address(mirror));
+        dn.initializeSF404(10 * _WAD, initialSupplyOwner, address(mirror));
         assertEq(dn.getSkipNFT(initialSupplyOwner), true);
         assertEq(dn.getSkipNFT(alice), false);
         assertEq(dn.getSkipNFT(bob), false);
@@ -268,7 +268,7 @@ contract DN404Test is SoladyTest {
         dn.setUseExistsLookup(_random() % 2 == 0);
 
         uint256 n = _bound(_random(), 0, 16);
-        dn.initializeDN404(n * _WAD, address(1111), address(mirror));
+        dn.initializeSF404(n * _WAD, address(1111), address(mirror));
 
         address[] memory addresses = new address[](3);
         addresses[0] = address(111);
@@ -402,7 +402,7 @@ contract DN404Test is SoladyTest {
     function testBatchNFTLog() external {
         uint32 totalNFTSupply = 10;
         address initialSupplyOwner = address(1111);
-        dn.initializeDN404(totalNFTSupply * _WAD, initialSupplyOwner, address(mirror));
+        dn.initializeSF404(totalNFTSupply * _WAD, initialSupplyOwner, address(mirror));
 
         vm.startPrank(initialSupplyOwner);
         dn.transfer(address(2222), 10e18);
@@ -418,7 +418,7 @@ contract DN404Test is SoladyTest {
     }
 
     function testOwnedIds() public {
-        dn.initializeDN404(5 * _WAD, address(this), address(mirror));
+        dn.initializeSF404(5 * _WAD, address(this), address(mirror));
 
         address alice = address(111);
         dn.transfer(alice, 5 * _WAD);
@@ -442,7 +442,7 @@ contract DN404Test is SoladyTest {
 
     function testOwnedIds(uint256) public {
         uint256 totalNFTSupply = _random() % 10;
-        dn.initializeDN404(totalNFTSupply * _WAD, address(this), address(mirror));
+        dn.initializeSF404(totalNFTSupply * _WAD, address(this), address(mirror));
 
         address alice = address(111);
         dn.transfer(alice, totalNFTSupply * _WAD);
@@ -489,7 +489,7 @@ contract DN404Test is SoladyTest {
         dn.setGivePermit2DefaultInfiniteAllowance(true);
         assertEq(dn.allowance(alice, _PERMIT2), type(uint256).max);
 
-        dn.initializeDN404(5 * _WAD, initialSupplyOwner, address(mirror));
+        dn.initializeSF404(5 * _WAD, initialSupplyOwner, address(mirror));
         vm.prank(initialSupplyOwner);
         dn.transfer(alice, 5 * _WAD);
 
@@ -497,7 +497,7 @@ contract DN404Test is SoladyTest {
         assertEq(dn.allowance(alice, _PERMIT2), 0);
 
         vm.prank(_PERMIT2);
-        vm.expectRevert(DN404.InsufficientAllowance.selector);
+        vm.expectRevert(SF404.InsufficientAllowance.selector);
         dn.transferFrom(alice, bob, 1 * _WAD);
 
         dn.setGivePermit2DefaultInfiniteAllowance(true);
@@ -511,13 +511,13 @@ contract DN404Test is SoladyTest {
         assertEq(dn.allowance(alice, _PERMIT2), 1 * _WAD - 1);
 
         vm.startPrank(_PERMIT2);
-        vm.expectRevert(DN404.InsufficientAllowance.selector);
+        vm.expectRevert(SF404.InsufficientAllowance.selector);
         dn.transferFrom(alice, bob, 1 * _WAD);
         dn.transferFrom(alice, bob, 1 * _WAD - 2);
         assertEq(dn.allowance(alice, _PERMIT2), 1);
         dn.transferFrom(alice, bob, 1);
         assertEq(dn.allowance(alice, _PERMIT2), 0);
-        vm.expectRevert(DN404.InsufficientAllowance.selector);
+        vm.expectRevert(SF404.InsufficientAllowance.selector);
         dn.transferFrom(alice, bob, 1);
         vm.stopPrank();
 
@@ -530,14 +530,14 @@ contract DN404Test is SoladyTest {
         (bool success, bytes memory result) =
             address(dn).call(abi.encodeWithSignature("nonSupportedFunction123()"));
         assertFalse(success);
-        assertEq(result, abi.encodePacked(DN404.FnSelectorNotRecognized.selector));
+        assertEq(result, abi.encodePacked(SF404.FnSelectorNotRecognized.selector));
     }
 
     function testMintNext() public {
         address alice = address(111);
         address bob = address(222);
 
-        dn.initializeDN404(10 * _WAD, address(this), address(mirror));
+        dn.initializeSF404(10 * _WAD, address(this), address(mirror));
         dn.mintNext(alice, 10 * _WAD);
         for (uint256 i = 11; i <= 20; ++i) {
             assertEq(mirror.ownerAt(i), alice);
@@ -559,7 +559,7 @@ contract DN404Test is SoladyTest {
         uint256[] memory balances = new uint256[](2);
         uint256 totalMinted = (_random() % 4) * _WAD;
 
-        dn.initializeDN404(totalMinted, address(this), address(mirror));
+        dn.initializeSF404(totalMinted, address(this), address(mirror));
 
         do {
             if (_random() % 2 == 0) {

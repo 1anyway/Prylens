@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "../../../src/DN404.sol";
+import "../../../src/SF404.sol";
 
-contract MockDN404 is DN404 {
+contract MockSF404 is SF404 {
     string private _name;
 
     string private _symbol;
@@ -55,16 +55,16 @@ contract MockDN404 is DN404 {
         _burn(from, amount);
     }
 
-    function initializeDN404(
+    function initializeSF404(
         uint256 initialTokenSupply,
         address initialSupplyOwner,
         address mirrorNFTContract
     ) public {
-        _initializeDN404(initialTokenSupply, initialSupplyOwner, mirrorNFTContract);
+        _initializeSF404(initialTokenSupply, initialSupplyOwner, mirrorNFTContract);
     }
 
     function getAddressDataInitialized(address target) public view returns (bool) {
-        return _getDN404Storage().addressData[target].flags & _ADDRESS_DATA_INITIALIZED_FLAG != 0;
+        return _getSF404Storage().addressData[target].flags & _ADDRESS_DATA_INITIALIZED_FLAG != 0;
     }
 
     function setAux(address target, uint88 value) public {
@@ -76,7 +76,7 @@ contract MockDN404 is DN404 {
     }
 
     function getNextTokenId() public view returns (uint32) {
-        return _getDN404Storage().nextTokenId;
+        return _getSF404Storage().nextTokenId;
     }
 
     function _addToBurnedPool(uint256, uint256) internal view virtual override returns (bool) {
@@ -88,7 +88,7 @@ contract MockDN404 is DN404 {
     }
 
     function setNumAliases(uint32 value) public {
-        _getDN404Storage().numAliases = value;
+        _getSF404Storage().numAliases = value;
     }
 
     function tokensOf(address owner) public view returns (uint256[] memory result) {
@@ -96,7 +96,7 @@ contract MockDN404 is DN404 {
     }
 
     function _tokensOfWithChecks(address owner) internal view returns (uint256[] memory result) {
-        DN404Storage storage $ = _getDN404Storage();
+        SF404Storage storage $ = _getSF404Storage();
         uint256 n = $.addressData[owner].ownedLength;
         result = new uint256[](n);
         for (uint256 i; i < n; ++i) {
@@ -109,7 +109,7 @@ contract MockDN404 is DN404 {
     }
 
     function randomTokenOf(address owner, uint256 seed) public view returns (uint256) {
-        DN404Storage storage $ = _getDN404Storage();
+        SF404Storage storage $ = _getSF404Storage();
         uint256 n = $.addressData[owner].ownedLength;
         return _get($.owned[owner], seed % n);
     }
@@ -147,7 +147,7 @@ contract MockDN404 is DN404 {
     }
 
     function _transfer(address from, address to, uint256 amount) internal virtual override {
-        DN404._transfer(_brutalized(from), _brutalized(to), amount);
+        SF404._transfer(_brutalized(from), _brutalized(to), amount);
     }
 
     function _transferFromNFT(address from, address to, uint256 id, address msgSender)
@@ -155,7 +155,7 @@ contract MockDN404 is DN404 {
         virtual
         override
     {
-        DN404._transferFromNFT(_brutalized(from), _brutalized(to), id, _brutalized(msgSender));
+        SF404._transferFromNFT(_brutalized(from), _brutalized(to), id, _brutalized(msgSender));
     }
 
     function _brutalized(address a) internal pure returns (address result) {

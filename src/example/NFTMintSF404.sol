@@ -1,27 +1,27 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "../DN404.sol";
-import "../DN404Mirror.sol";
+import "../SF404.sol";
+import "../SF404Mirror.sol";
 import {Ownable} from "solady/auth/Ownable.sol";
 import {LibString} from "solady/utils/LibString.sol";
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 import {MerkleProofLib} from "solady/utils/MerkleProofLib.sol";
 
 /**
- * @title NFTMintDN404
- * @notice Sample DN404 contract that demonstrates the owner selling NFTs rather than the fungible token.
+ * @title NFTMintSF404
+ * @notice Sample SF404 contract that demonstrates the owner selling NFTs rather than the fungible token.
  * The underlying call still mints ERC20 tokens, but to the end user it'll appear as a standard NFT mint.
  * Each address is limited to MAX_PER_WALLET total mints.
  */
-contract NFTMintDN404 is DN404, Ownable {
+contract NFTMintSF404 is SF404, Ownable {
     string private _name;
     string private _symbol;
     string private _baseURI;
     bytes32 private _allowlistRoot;
     uint96 public publicPrice; // uint96 is sufficient to represent all ETH in existence.
     uint96 public allowlistPrice; // uint96 is sufficient to represent all ETH in existence.
-    uint32 public totalMinted; // DN404 only supports up to `2**32 - 2` tokens.
+    uint32 public totalMinted; // SF404 only supports up to `2**32 - 2` tokens.
     bool public live;
 
     uint32 public constant MAX_PER_WALLET = 5;
@@ -50,8 +50,8 @@ contract NFTMintDN404 is DN404, Ownable {
         publicPrice = publicPrice_;
         allowlistPrice = allowlistPrice_;
 
-        address mirror = address(new DN404Mirror(msg.sender));
-        _initializeDN404(initialTokenSupply, initialSupplyOwner, mirror);
+        address mirror = address(new SF404Mirror(msg.sender));
+        _initializeSF404(initialTokenSupply, initialSupplyOwner, mirror);
     }
 
     modifier onlyLive() {

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-/// @title DN404Mirror
-/// @notice DN404Mirror provides an interface for interacting with the
-/// NFT tokens in a DN404 implementation.
+/// @title SF404Mirror
+/// @notice SF404Mirror provides an interface for interacting with the
+/// NFT tokens in a SF404 implementation.
 ///
 /// @author vectorized.eth (@optimizoor)
 /// @author Quit (@0xQuit)
@@ -13,8 +13,8 @@ pragma solidity ^0.8.4;
 /// @author Harrison (@PopPunkOnChain)
 ///
 /// @dev Note:
-/// - The ERC721 data is stored in the base DN404 contract.
-contract DN404Mirror {
+/// - The ERC721 data is stored in the base SF404 contract.
+contract SF404Mirror {
     /*«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-*/
     /*                           EVENTS                           */
     /*-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»*/
@@ -50,7 +50,7 @@ contract DN404Mirror {
     /*-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»*/
 
     /// @dev Thrown when a call for an NFT function did not originate
-    /// from the base DN404 contract.
+    /// from the base SF404 contract.
     error SenderNotBase();
 
     /// @dev Thrown when a call for an NFT function did not originate from the deployer.
@@ -60,15 +60,15 @@ contract DN404Mirror {
     /// does not implement ERC721Receiver.
     error TransferToNonERC721ReceiverImplementer();
 
-    /// @dev Thrown when linking to the DN404 base contract and the
-    /// DN404 supportsInterface check fails or the call reverts.
+    /// @dev Thrown when linking to the SF404 base contract and the
+    /// SF404 supportsInterface check fails or the call reverts.
     error CannotLink();
 
     /// @dev Thrown when a linkMirrorContract call is received and the
-    /// NFT mirror contract has already been linked to a DN404 base contract.
+    /// NFT mirror contract has already been linked to a SF404 base contract.
     error AlreadyLinked();
 
-    /// @dev Thrown when retrieving the base DN404 address when a link has not
+    /// @dev Thrown when retrieving the base SF404 address when a link has not
     /// been established.
     error NotLinked();
 
@@ -80,7 +80,7 @@ contract DN404Mirror {
     /*-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»*/
 
     /// @dev Struct contain the NFT mirror contract storage.
-    struct DN404NFTStorage {
+    struct SF404NFTStorage {
         // Address of the ERC20 base contract.
         address baseERC20;
         // The deployer, if provided. If non-zero, the initialization of the
@@ -90,11 +90,11 @@ contract DN404Mirror {
         address owner;
     }
 
-    /// @dev Returns a storage pointer for DN404NFTStorage.
-    function _getDN404NFTStorage() internal pure virtual returns (DN404NFTStorage storage $) {
+    /// @dev Returns a storage pointer for SF404NFTStorage.
+    function _getSF404NFTStorage() internal pure virtual returns (SF404NFTStorage storage $) {
         /// @solidity memory-safe-assembly
         assembly {
-            // `uint72(bytes9(keccak256("DN404_MIRROR_STORAGE")))`.
+            // `uint72(bytes9(keccak256("SF404_MIRROR_STORAGE")))`.
             $.slot := 0x3602298b8c10b01230 // Truncate to 9 bytes to reduce bytecode size.
         }
     }
@@ -106,35 +106,35 @@ contract DN404Mirror {
     constructor(address deployer) {
         // For non-proxies, we will store the deployer so that only the deployer can
         // link the base contract.
-        _getDN404NFTStorage().deployer = deployer;
+        _getSF404NFTStorage().deployer = deployer;
     }
 
     /*«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-*/
     /*                     ERC721 OPERATIONS                      */
     /*-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»*/
 
-    /// @dev Returns the token collection name from the base DN404 contract.
+    /// @dev Returns the token collection name from the base SF404 contract.
     function name() public view virtual returns (string memory) {
         return _readString(0x06fdde03, 0); // `name()`.
     }
 
-    /// @dev Returns the token collection symbol from the base DN404 contract.
+    /// @dev Returns the token collection symbol from the base SF404 contract.
     function symbol() public view virtual returns (string memory) {
         return _readString(0x95d89b41, 0); // `symbol()`.
     }
 
     /// @dev Returns the Uniform Resource Identifier (URI) for token `id` from
-    /// the base DN404 contract.
+    /// the base SF404 contract.
     function tokenURI(uint256 id) public view virtual returns (string memory) {
         return _readString(0xc87b56dd, id); // `tokenURI(uint256)`.
     }
 
-    /// @dev Returns the total NFT supply from the base DN404 contract.
+    /// @dev Returns the total NFT supply from the base SF404 contract.
     function totalSupply() public view virtual returns (uint256) {
         return _readWord(0xe2c79281, 0, 0); // `totalNFTSupply()`.
     }
 
-    /// @dev Returns the number of NFT tokens owned by `nftOwner` from the base DN404 contract.
+    /// @dev Returns the number of NFT tokens owned by `nftOwner` from the base SF404 contract.
     ///
     /// Requirements:
     /// - `nftOwner` must not be the zero address.
@@ -142,7 +142,7 @@ contract DN404Mirror {
         return _readWord(0xf5b100ea, uint160(nftOwner), 0); // `balanceOfNFT(address)`.
     }
 
-    /// @dev Returns the owner of token `id` from the base DN404 contract.
+    /// @dev Returns the owner of token `id` from the base SF404 contract.
     ///
     /// Requirements:
     /// - Token `id` must exist.
@@ -150,14 +150,14 @@ contract DN404Mirror {
         return address(uint160(_readWord(0x6352211e, id, 0))); // `ownerOf(uint256)`.
     }
 
-    /// @dev Returns the owner of token `id` from the base DN404 contract.
+    /// @dev Returns the owner of token `id` from the base SF404 contract.
     /// Returns `address(0)` instead of reverting if the token does not exist.
     function ownerAt(uint256 id) public view virtual returns (address) {
         return address(uint160(_readWord(0x24359879, id, 0))); // `ownerAt(uint256)`.
     }
 
     /// @dev Sets `spender` as the approved account to manage token `id` in
-    /// the base DN404 contract.
+    /// the base SF404 contract.
     ///
     /// Requirements:
     /// - Token `id` must exist.
@@ -192,7 +192,7 @@ contract DN404Mirror {
     }
 
     /// @dev Returns the account approved to manage token `id` from
-    /// the base DN404 contract.
+    /// the base SF404 contract.
     ///
     /// Requirements:
     /// - Token `id` must exist.
@@ -201,7 +201,7 @@ contract DN404Mirror {
     }
 
     /// @dev Sets whether `operator` is approved to manage the tokens of the caller in
-    /// the base DN404 contract.
+    /// the base SF404 contract.
     ///
     /// Emits an {ApprovalForAll} event.
     function setApprovalForAll(address operator, bool approved) public virtual {
@@ -232,7 +232,7 @@ contract DN404Mirror {
     }
 
     /// @dev Returns whether `operator` is approved to manage the tokens of `nftOwner` from
-    /// the base DN404 contract.
+    /// the base SF404 contract.
     function isApprovedForAll(address nftOwner, address operator)
         public
         view
@@ -324,10 +324,10 @@ contract DN404Mirror {
 
     /// @dev Returns the `owner` of the contract, for marketplace signaling purposes.
     function owner() public view virtual returns (address) {
-        return _getDN404NFTStorage().owner;
+        return _getSF404NFTStorage().owner;
     }
 
-    /// @dev Permissionless function to pull the owner from the base DN404 contract
+    /// @dev Permissionless function to pull the owner from the base SF404 contract
     /// if it implements ownable, for marketplace signaling purposes.
     function pullOwner() public virtual returns (bool) {
         address newOwner;
@@ -338,7 +338,7 @@ contract DN404Mirror {
             let success := staticcall(gas(), base, 0x1c, 0x04, 0x00, 0x20)
             newOwner := mul(shr(96, mload(0x0c)), and(gt(returndatasize(), 0x1f), success))
         }
-        DN404NFTStorage storage $ = _getDN404NFTStorage();
+        SF404NFTStorage storage $ = _getSF404NFTStorage();
         address oldOwner = $.owner;
         if (oldOwner != newOwner) {
             $.owner = newOwner;
@@ -351,15 +351,15 @@ contract DN404Mirror {
     /*                     MIRROR OPERATIONS                      */
     /*-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»*/
 
-    /// @dev Returns the address of the base DN404 contract.
+    /// @dev Returns the address of the base SF404 contract.
     function baseERC20() public view virtual returns (address base) {
-        base = _getDN404NFTStorage().baseERC20;
+        base = _getSF404NFTStorage().baseERC20;
         if (base == address(0)) revert NotLinked();
     }
 
-    /// @dev Fallback modifier to execute calls from the base DN404 contract.
-    modifier dn404NFTFallback() virtual {
-        DN404NFTStorage storage $ = _getDN404NFTStorage();
+    /// @dev Fallback modifier to execute calls from the base SF404 contract.
+    modifier SF404NFTFallback() virtual {
+        SF404NFTStorage storage $ = _getSF404NFTStorage();
 
         uint256 fnSelector = _calldataload(0x00) >> 224;
 
@@ -421,11 +421,11 @@ contract DN404Mirror {
         _;
     }
 
-    /// @dev Fallback function for calls from base DN404 contract.
+    /// @dev Fallback function for calls from base SF404 contract.
     /// Override this if you need to implement your custom
     /// fallback with utilities like Solady's `LibZip.cdFallback()`.
-    /// And always remember to always wrap the fallback with `dn404NFTFallback`.
-    fallback() external payable virtual dn404NFTFallback {
+    /// And always remember to always wrap the fallback with `SF404NFTFallback`.
+    fallback() external payable virtual SF404NFTFallback {
         revert FnSelectorNotRecognized(); // Not mandatory. Just for quality of life.
     }
 
@@ -439,7 +439,7 @@ contract DN404Mirror {
     /*                      PRIVATE HELPERS                       */
     /*-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»*/
 
-    /// @dev Helper to read a string from the base DN404 contract.
+    /// @dev Helper to read a string from the base SF404 contract.
     function _readString(uint256 fnSelector, uint256 arg0)
         private
         view
@@ -464,7 +464,7 @@ contract DN404Mirror {
         }
     }
 
-    /// @dev Helper to read a word from the base DN404 contract.
+    /// @dev Helper to read a word from the base SF404 contract.
     function _readWord(uint256 fnSelector, uint256 arg0, uint256 arg1)
         private
         view

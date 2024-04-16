@@ -2,8 +2,8 @@
 pragma solidity ^0.8.4;
 
 import {SoladyTest} from "../../utils/SoladyTest.sol";
-import {DN404, MockDN404} from "../../utils/mocks/MockDN404.sol";
-import {DN404Mirror} from "../../../src/DN404Mirror.sol";
+import {SF404, MockSF404} from "../../utils/mocks/MockSF404.sol";
+import {SF404Mirror} from "../../../src/SF404Mirror.sol";
 
 contract MintTests is SoladyTest {
     error TransferToZeroAddress();
@@ -16,13 +16,13 @@ contract MintTests is SoladyTest {
     uint256 private constant START_SLOT =
         0x0000000000000000000000000000000000000000000000a20d6e21d0e5255308;
 
-    MockDN404 dn;
-    DN404Mirror mirror;
+    MockSF404 dn;
+    SF404Mirror mirror;
 
     function setUp() public {
-        dn = new MockDN404();
-        mirror = new DN404Mirror(address(this));
-        dn.initializeDN404(0, address(0), address(mirror));
+        dn = new MockSF404();
+        mirror = new SF404Mirror(address(this));
+        dn.initializeSF404(0, address(0), address(mirror));
     }
 
     function test_WhenRecipientIsAddress0(uint256) external {

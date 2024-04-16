@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "../../../src/DN404.sol";
+import "../../../src/SF404.sol";
 
-contract MockDN404Slim is DN404 {
+contract MockSF404Slim is SF404 {
     function name() public view virtual override returns (string memory) {
         return "name";
     }
@@ -16,12 +16,12 @@ contract MockDN404Slim is DN404 {
         return "";
     }
 
-    function initializeDN404(
+    function initializeSF404(
         uint256 initialTokenSupply,
         address initialSupplyOwner,
         address mirrorNFTContract
     ) public {
-        _initializeDN404(initialTokenSupply, initialSupplyOwner, mirrorNFTContract);
+        _initializeSF404(initialTokenSupply, initialSupplyOwner, mirrorNFTContract);
     }
 
     function _addToBurnedPool(uint256, uint256) internal view virtual override returns (bool) {

@@ -2,34 +2,34 @@
 pragma solidity ^0.8.4;
 
 import "./utils/SoladyTest.sol";
-import {MockDN404CustomUnit} from "./utils/mocks/MockDN404CustomUnit.sol";
-import {DN404Mirror} from "../src/DN404Mirror.sol";
-import {DN404} from "../src/DN404.sol";
+import {MockSF404CustomUnit} from "./utils/mocks/MockSF404CustomUnit.sol";
+import {SF404Mirror} from "../src/SF404Mirror.sol";
+import {SF404} from "../src/SF404.sol";
 
-contract DN404CustomUnitTest is SoladyTest {
-    MockDN404CustomUnit dn;
-    DN404Mirror mirror;
+contract SF404CustomUnitTest is SoladyTest {
+    MockSF404CustomUnit dn;
+    SF404Mirror mirror;
 
     function setUp() public {
-        dn = new MockDN404CustomUnit();
-        mirror = new DN404Mirror(address(this));
+        dn = new MockSF404CustomUnit();
+        mirror = new SF404Mirror(address(this));
     }
 
     function testInitializeWithZeroUnitReverts() public {
         dn.setUnit(0);
-        vm.expectRevert(DN404.InvalidUnit.selector);
-        dn.initializeDN404(1000, address(this), address(mirror));
+        vm.expectRevert(SF404.InvalidUnit.selector);
+        dn.initializeSF404(1000, address(this), address(mirror));
     }
 
     function testInitializeCorrectUnitSuccess() public {
         dn.setUnit(2 ** 96 - 1);
-        dn.initializeDN404(1000, address(this), address(mirror));
+        dn.initializeSF404(1000, address(this), address(mirror));
     }
 
     function testInitializeWithUnitTooLargeReverts() public {
         dn.setUnit(2 ** 96);
-        vm.expectRevert(DN404.InvalidUnit.selector);
-        dn.initializeDN404(1000, address(this), address(mirror));
+        vm.expectRevert(SF404.InvalidUnit.selector);
+        dn.initializeSF404(1000, address(this), address(mirror));
     }
 
     function testUnitInvalidCheckTrick(uint256 unit) public {
@@ -45,7 +45,7 @@ contract DN404CustomUnitTest is SoladyTest {
     function testMint() public {
         address alice = address(111);
         dn.setUnit(10 ** 25);
-        dn.initializeDN404(1000, address(this), address(mirror));
+        dn.initializeSF404(1000, address(this), address(mirror));
         dn.mint(alice, 100);
         assertEq(dn.totalSupply(), 1100);
         assertEq(mirror.balanceOf(alice), 0);
@@ -56,7 +56,7 @@ contract DN404CustomUnitTest is SoladyTest {
         uint256 unit = 404 * 10 ** 21;
         uint256 numNFTMints = 5000;
         dn.setUnit(unit);
-        dn.initializeDN404(1000, address(this), address(mirror));
+        dn.initializeSF404(1000, address(this), address(mirror));
         dn.mint(alice, unit * numNFTMints);
         assertEq(dn.totalSupply(), unit * numNFTMints + 1000);
         assertEq(mirror.balanceOf(alice), numNFTMints);
@@ -69,10 +69,10 @@ contract DN404CustomUnitTest is SoladyTest {
         unit = _bound(unit, initial + 1, type(uint96).max);
 
         dn.setUnit(unit);
-        dn.initializeDN404(initial, address(this), address(mirror));
+        dn.initializeSF404(initial, address(this), address(mirror));
 
         if (initial + unit * numNFTMints > type(uint96).max) {
-            vm.expectRevert(DN404.TotalSupplyOverflow.selector);
+            vm.expectRevert(SF404.TotalSupplyOverflow.selector);
             dn.mint(alice, unit * numNFTMints);
         } else {
             uint256 expectedBalance = unit * numNFTMints;
@@ -99,10 +99,10 @@ contract DN404CustomUnitTest is SoladyTest {
 
         initial = _bound(initial, 0, type(uint96).max - 1);
         if (initial / unit > type(uint32).max - 1) {
-            vm.expectRevert(DN404.TotalSupplyOverflow.selector);
-            dn.initializeDN404(initial, address(this), address(mirror));
+            vm.expectRevert(SF404.TotalSupplyOverflow.selector);
+            dn.initializeSF404(initial, address(this), address(mirror));
         } else {
-            dn.initializeDN404(initial, address(this), address(mirror));
+            dn.initializeSF404(initial, address(this), address(mirror));
             numNFTMints = _bound(numNFTMints, 0, type(uint32).max);
             uint256 expectedBalance = unit * numNFTMints;
             uint256 expectedTotalSupply = initial + expectedBalance;
@@ -110,7 +110,7 @@ contract DN404CustomUnitTest is SoladyTest {
                 expectedTotalSupply / unit > type(uint32).max - 1
                     || expectedTotalSupply > type(uint96).max
             ) {
-                vm.expectRevert(DN404.TotalSupplyOverflow.selector);
+                vm.expectRevert(SF404.TotalSupplyOverflow.selector);
                 dn.mint(alice, unit * numNFTMints);
             } else {
                 dn.mint(alice, unit * numNFTMints);
@@ -128,10 +128,10 @@ contract DN404CustomUnitTest is SoladyTest {
         dn.setUnit(unit);
         uint256 initial = unit * numNFTMints + dust;
         if (initial > type(uint96).max) {
-            vm.expectRevert(DN404.TotalSupplyOverflow.selector);
-            dn.initializeDN404(initial, address(this), address(mirror));
+            vm.expectRevert(SF404.TotalSupplyOverflow.selector);
+            dn.initializeSF404(initial, address(this), address(mirror));
         } else {
-            dn.initializeDN404(initial, address(this), address(mirror));
+            dn.initializeSF404(initial, address(this), address(mirror));
             dn.transfer(alice, initial);
             assertEq(mirror.balanceOf(alice), numNFTMints);
         }

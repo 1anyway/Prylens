@@ -1,5 +1,5 @@
 {
-  "name": "dn404",
+  "name": "SF404",
   "license": "MIT",
   "version": "0.0.13",
   "description": "Implementation of a co-joined ERC20 and ERC721 pair.",
@@ -8,6 +8,6 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vectorized/dn404.git"
+    "url": "git+https://github.com/vectorized/SF404.git"
   }
 }

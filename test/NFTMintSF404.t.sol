@@ -2,13 +2,13 @@
 pragma solidity ^0.8.4;
 
 import "./utils/SoladyTest.sol";
-import {NFTMintDN404} from "../src/example/NFTMintDN404.sol";
+import {NFTMintSF404} from "../src/example/NFTMintSF404.sol";
 import {Merkle} from "murky/src/Merkle.sol";
 
-contract NFTMintDN404Test is SoladyTest {
+contract NFTMintSF404Test is SoladyTest {
     uint256 internal constant _WAD = 10 ** 18;
 
-    NFTMintDN404 dn;
+    NFTMintSF404 dn;
     Merkle allowlistMerkle;
 
     address alice = address(111);
@@ -25,8 +25,8 @@ contract NFTMintDN404Test is SoladyTest {
         allowlistData[0] = bytes32(keccak256(abi.encodePacked(alice)));
         allowlistRoot = allowlistMerkle.getRoot(allowlistData);
 
-        dn = new NFTMintDN404(
-            "DN404",
+        dn = new NFTMintSF404(
+            "SF404",
             "DN",
             allowlistRoot,
             publicPrice,
@@ -42,7 +42,7 @@ contract NFTMintDN404Test is SoladyTest {
     function testMint() public {
         vm.startPrank(bob);
 
-        vm.expectRevert(NFTMintDN404.InvalidPrice.selector);
+        vm.expectRevert(NFTMintSF404.InvalidPrice.selector);
         dn.mint{value: 1 ether}(1);
 
         dn.mint{value: 3 * publicPrice}(3);
@@ -53,7 +53,7 @@ contract NFTMintDN404Test is SoladyTest {
         assertEq(dn.totalSupply(), 1005 * _WAD);
         assertEq(dn.balanceOf(bob), 5 * _WAD);
 
-        vm.expectRevert(NFTMintDN404.InvalidMint.selector);
+        vm.expectRevert(NFTMintSF404.InvalidMint.selector);
         dn.mint{value: publicPrice}(1);
 
         vm.stopPrank();
@@ -69,7 +69,7 @@ contract NFTMintDN404Test is SoladyTest {
         }
 
         vm.prank(alice);
-        vm.expectRevert(NFTMintDN404.TotalSupplyReached.selector);
+        vm.expectRevert(NFTMintSF404.TotalSupplyReached.selector);
         dn.mint{value: publicPrice}(1);
     }
 
@@ -77,19 +77,19 @@ contract NFTMintDN404Test is SoladyTest {
         vm.prank(bob);
 
         bytes32[] memory proof = allowlistMerkle.getProof(allowlistData, 0);
-        vm.expectRevert(NFTMintDN404.InvalidProof.selector);
+        vm.expectRevert(NFTMintSF404.InvalidProof.selector);
         dn.allowlistMint{value: 5 * allowlistPrice}(5, proof);
 
         vm.startPrank(alice);
 
-        vm.expectRevert(NFTMintDN404.InvalidPrice.selector);
+        vm.expectRevert(NFTMintSF404.InvalidPrice.selector);
         dn.allowlistMint{value: 1 ether}(1, proof);
 
         dn.allowlistMint{value: 5 * allowlistPrice}(5, proof);
         assertEq(dn.totalSupply(), 1005 * _WAD);
         assertEq(dn.balanceOf(alice), 5 * _WAD);
 
-        vm.expectRevert(NFTMintDN404.InvalidMint.selector);
+        vm.expectRevert(NFTMintSF404.InvalidMint.selector);
         dn.allowlistMint{value: allowlistPrice}(1, proof);
 
         vm.stopPrank();

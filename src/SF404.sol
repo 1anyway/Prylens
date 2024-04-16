@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-/// @title DN404
-/// @notice DN404 is a hybrid ERC20 and ERC721 implementation that mints
+/// @title SF404
+/// @notice SF404 is a hybrid ERC20 and ERC721 implementation that mints
 /// and burns NFTs based on an account's ERC20 token balance.
 ///
 /// @author vectorized.eth (@optimizoor)
@@ -13,10 +13,10 @@ pragma solidity ^0.8.4;
 /// @author Harrison (@PopPunkOnChain)
 ///
 /// @dev Note:
-/// - The ERC721 data is stored in this base DN404 contract, however a
-///   DN404Mirror contract ***MUST*** be deployed and linked during
+/// - The ERC721 data is stored in this base SF404 contract, however a
+///   SF404Mirror contract ***MUST*** be deployed and linked during
 ///   initialization.
-abstract contract DN404 {
+abstract contract SF404 {
     /*«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-*/
     /*                           EVENTS                           */
     /*-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»*/
@@ -152,7 +152,7 @@ abstract contract DN404 {
     }
 
     /// @dev Struct containing the base token contract storage.
-    struct DN404Storage {
+    struct SF404Storage {
         // Current number of address aliases assigned.
         uint32 numAliases;
         // Next NFT ID to assign for a mint.
@@ -189,11 +189,11 @@ abstract contract DN404 {
         mapping(address => AddressData) addressData;
     }
 
-    /// @dev Returns a storage pointer for DN404Storage.
-    function _getDN404Storage() internal pure virtual returns (DN404Storage storage $) {
+    /// @dev Returns a storage pointer for SF404Storage.
+    function _getSF404Storage() internal pure virtual returns (SF404Storage storage $) {
         /// @solidity memory-safe-assembly
         assembly {
-            // `uint72(bytes9(keccak256("DN404_STORAGE")))`.
+            // `uint72(bytes9(keccak256("SF404_STORAGE")))`.
             $.slot := 0xa20d6e21d0e5255308 // Truncate to 9 bytes to reduce bytecode size.
         }
     }
@@ -202,14 +202,14 @@ abstract contract DN404 {
     /*                         INITIALIZER                        */
     /*-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»-»*/
 
-    /// @dev Initializes the DN404 contract with an
+    /// @dev Initializes the SF404 contract with an
     /// `initialTokenSupply`, `initialTokenOwner` and `mirror` NFT contract address.
-    function _initializeDN404(
+    function _initializeSF404(
         uint256 initialTokenSupply,
         address initialSupplyOwner,
         address mirror
     ) internal virtual {
-        DN404Storage storage $ = _getDN404Storage();
+        SF404Storage storage $ = _getSF404Storage();
 
         unchecked {
             if (_unit() - 1 >= 2 ** 96 - 1) revert InvalidUnit();
@@ -319,21 +319,21 @@ abstract contract DN404 {
 
     /// @dev Returns the amount of tokens in existence.
     function totalSupply() public view virtual returns (uint256) {
-        return uint256(_getDN404Storage().totalSupply);
+        return uint256(_getSF404Storage().totalSupply);
     }
 
     /// @dev Returns the amount of tokens owned by `owner`.
     function balanceOf(address owner) public view virtual returns (uint256) {
-        return _getDN404Storage().addressData[owner].balance;
+        return _getSF404Storage().addressData[owner].balance;
     }
 
     /// @dev Returns the amount of tokens that `spender` can spend on behalf of `owner`.
     function allowance(address owner, address spender) public view returns (uint256) {
         if (_givePermit2DefaultInfiniteAllowance() && spender == _PERMIT2) {
-            uint8 flags = _getDN404Storage().addressData[owner].flags;
+            uint8 flags = _getSF404Storage().addressData[owner].flags;
             if (_isZero(flags & _ADDRESS_DATA_OVERRIDE_PERMIT2_FLAG)) return type(uint256).max;
         }
-        return _ref(_getDN404Storage().allowance, owner, spender).value;
+        return _ref(_getSF404Storage().allowance, owner, spender).value;
     }
 
     /// @dev Sets `amount` as the allowance of `spender` over the caller's tokens.
@@ -379,10 +379,10 @@ abstract contract DN404 {
     ///
     /// Emits a {Transfer} event.
     function transferFrom(address from, address to, uint256 amount) public virtual returns (bool) {
-        Uint256Ref storage a = _ref(_getDN404Storage().allowance, from, msg.sender);
+        Uint256Ref storage a = _ref(_getSF404Storage().allowance, from, msg.sender);
 
         uint256 allowed = _givePermit2DefaultInfiniteAllowance() && msg.sender == _PERMIT2
-            && _isZero(_getDN404Storage().addressData[from].flags & _ADDRESS_DATA_OVERRIDE_PERMIT2_FLAG)
+            && _isZero(_getSF404Storage().addressData[from].flags & _ADDRESS_DATA_OVERRIDE_PERMIT2_FLAG)
             ? type(uint256).max
             : a.value;
 
@@ -421,7 +421,7 @@ abstract contract DN404 {
         if (to == address(0)) revert TransferToZeroAddress();
 
         AddressData storage toAddressData = _addressData(to);
-        DN404Storage storage $ = _getDN404Storage();
+        SF404Storage storage $ = _getSF404Storage();
         if ($.mirrorERC721 == address(0)) revert DNNotInitialized();
 
         _DNMintTemps memory t;
@@ -500,7 +500,7 @@ abstract contract DN404 {
         if (to == address(0)) revert TransferToZeroAddress();
 
         AddressData storage toAddressData = _addressData(to);
-        DN404Storage storage $ = _getDN404Storage();
+        SF404Storage storage $ = _getSF404Storage();
         if ($.mirrorERC721 == address(0)) revert DNNotInitialized();
 
         _DNMintTemps memory t;
@@ -571,7 +571,7 @@ abstract contract DN404 {
     ///
     /// Emits a {Transfer} event.
     function _burn(address from, uint256 amount) internal virtual {
-        DN404Storage storage $ = _getDN404Storage();
+        SF404Storage storage $ = _getSF404Storage();
         if ($.mirrorERC721 == address(0)) revert DNNotInitialized();
 
         AddressData storage fromAddressData = $.addressData[from];
@@ -644,7 +644,7 @@ abstract contract DN404 {
     function _transfer(address from, address to, uint256 amount) internal virtual {
         if (to == address(0)) revert TransferToZeroAddress();
 
-        DN404Storage storage $ = _getDN404Storage();
+        SF404Storage storage $ = _getSF404Storage();
         AddressData storage fromAddressData = $.addressData[from];
         AddressData storage toAddressData = _addressData(to);
         if ($.mirrorERC721 == address(0)) revert DNNotInitialized();
@@ -796,7 +796,7 @@ abstract contract DN404 {
     {
         if (to == address(0)) revert TransferToZeroAddress();
 
-        DN404Storage storage $ = _getDN404Storage();
+        SF404Storage storage $ = _getSF404Storage();
         if ($.mirrorERC721 == address(0)) revert DNNotInitialized();
 
         Uint32Map storage oo = $.oo;
@@ -860,9 +860,9 @@ abstract contract DN404 {
     /// Emits a {Approval} event.
     function _approve(address owner, address spender, uint256 amount) internal virtual {
         if (_givePermit2DefaultInfiniteAllowance() && spender == _PERMIT2) {
-            _getDN404Storage().addressData[owner].flags |= _ADDRESS_DATA_OVERRIDE_PERMIT2_FLAG;
+            _getSF404Storage().addressData[owner].flags |= _ADDRESS_DATA_OVERRIDE_PERMIT2_FLAG;
         }
-        _ref(_getDN404Storage().allowance, owner, spender).value = amount;
+        _ref(_getSF404Storage().allowance, owner, spender).value = amount;
         /// @solidity memory-safe-assembly
         assembly {
             // Emit the {Approval} event.
@@ -880,14 +880,14 @@ abstract contract DN404 {
     /// Minting, transferring, burning the tokens of `owner` will not change the auxiliary data.
     /// Auxiliary data can be set for any address, even if it does not have any tokens.
     function _getAux(address owner) internal view virtual returns (uint88) {
-        return _getDN404Storage().addressData[owner].aux;
+        return _getSF404Storage().addressData[owner].aux;
     }
 
     /// @dev Set the auxiliary data for `owner` to `value`.
     /// Minting, transferring, burning the tokens of `owner` will not change the auxiliary data.
     /// Auxiliary data can be set for any address, even if it does not have any tokens.
     function _setAux(address owner, uint88 value) internal virtual {
-        _getDN404Storage().addressData[owner].aux = value;
+        _getSF404Storage().addressData[owner].aux = value;
     }
 
     /*«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-«-*/
@@ -897,7 +897,7 @@ abstract contract DN404 {
     /// @dev Returns true if minting and transferring ERC20s to `owner` will skip minting NFTs.
     /// Returns false otherwise.
     function getSkipNFT(address owner) public view virtual returns (bool) {
-        AddressData storage d = _getDN404Storage().addressData[owner];
+        AddressData storage d = _getSF404Storage().addressData[owner];
         if (_isZero(d.flags & _ADDRESS_DATA_INITIALIZED_FLAG)) return _hasCode(owner);
         return d.flags & _ADDRESS_DATA_SKIP_NFT_FLAG != 0;
     }
@@ -931,7 +931,7 @@ abstract contract DN404 {
     ///
     /// Initializes account `owner` AddressData if it is not currently initialized.
     function _addressData(address owner) internal virtual returns (AddressData storage d) {
-        d = _getDN404Storage().addressData[owner];
+        d = _getSF404Storage().addressData[owner];
         unchecked {
             if (_isZero(d.flags & _ADDRESS_DATA_INITIALIZED_FLAG)) {
                 uint256 skipNFT = _toUint(_hasCode(owner)) * _ADDRESS_DATA_SKIP_NFT_FLAG;
@@ -948,7 +948,7 @@ abstract contract DN404 {
         virtual
         returns (uint32 addressAlias)
     {
-        DN404Storage storage $ = _getDN404Storage();
+        SF404Storage storage $ = _getSF404Storage();
         addressAlias = toAddressData.addressAlias;
         if (_isZero(addressAlias)) {
             unchecked {
@@ -966,23 +966,23 @@ abstract contract DN404 {
 
     /// @dev Returns the address of the mirror NFT contract.
     function mirrorERC721() public view virtual returns (address) {
-        return _getDN404Storage().mirrorERC721;
+        return _getSF404Storage().mirrorERC721;
     }
 
     /// @dev Returns the total NFT supply.
     function _totalNFTSupply() internal view virtual returns (uint256) {
-        return _getDN404Storage().totalNFTSupply;
+        return _getSF404Storage().totalNFTSupply;
     }
 
     /// @dev Returns `owner` NFT balance.
     function _balanceOfNFT(address owner) internal view virtual returns (uint256) {
-        return _getDN404Storage().addressData[owner].ownedLength;
+        return _getSF404Storage().addressData[owner].ownedLength;
     }
 
     /// @dev Returns the owner of token `id`.
     /// Returns the zero address instead of reverting if the token does not exist.
     function _ownerAt(uint256 id) internal view virtual returns (address) {
-        DN404Storage storage $ = _getDN404Storage();
+        SF404Storage storage $ = _getSF404Storage();
         return $.aliasToAddress[_get($.oo, _ownershipIndex(_restrictNFTId(id)))];
     }
 
@@ -1002,7 +1002,7 @@ abstract contract DN404 {
         virtual
         returns (bool)
     {
-        return !_isZero(_ref(_getDN404Storage().operatorApprovals, owner, operator).value);
+        return !_isZero(_ref(_getSF404Storage().operatorApprovals, owner, operator).value);
     }
 
     /// @dev Returns if token `id` exists.
@@ -1016,7 +1016,7 @@ abstract contract DN404 {
     /// - Token `id` must exist.
     function _getApproved(uint256 id) internal view virtual returns (address) {
         if (!_exists(id)) revert TokenDoesNotExist();
-        return _getDN404Storage().nftApprovals[id];
+        return _getSF404Storage().nftApprovals[id];
     }
 
     /// @dev Sets `spender` as the approved account to manage token `id`, using `msgSender`.
@@ -1028,7 +1028,7 @@ abstract contract DN404 {
         virtual
         returns (address owner)
     {
-        DN404Storage storage $ = _getDN404Storage();
+        SF404Storage storage $ = _getSF404Storage();
 
         owner = $.aliasToAddress[_get($.oo, _ownershipIndex(_restrictNFTId(id)))];
 
@@ -1048,7 +1048,7 @@ abstract contract DN404 {
         internal
         virtual
     {
-        _ref(_getDN404Storage().operatorApprovals, msgSender, operator).value = _toUint(approved);
+        _ref(_getSF404Storage().operatorApprovals, msgSender, operator).value = _toUint(approved);
     }
 
     /// @dev Returns the NFT IDs of `owner` in the range `[begin..end)` (exclusive of `end`).
@@ -1060,7 +1060,7 @@ abstract contract DN404 {
         virtual
         returns (uint256[] memory ids)
     {
-        DN404Storage storage $ = _getDN404Storage();
+        SF404Storage storage $ = _getSF404Storage();
         Uint32Map storage owned = $.owned[owner];
         end = _min($.addressData[owner].ownedLength, end);
         /// @solidity memory-safe-assembly
@@ -1079,8 +1079,8 @@ abstract contract DN404 {
 
     /// @dev Fallback modifier to dispatch calls from the mirror NFT contract
     /// to internal functions in this contract.
-    modifier dn404Fallback() virtual {
-        DN404Storage storage $ = _getDN404Storage();
+    modifier SF404Fallback() virtual {
+        SF404Storage storage $ = _getSF404Storage();
 
         uint256 fnSelector = _calldataload(0x00) >> 224;
 
@@ -1158,7 +1158,7 @@ abstract contract DN404 {
                 return(o, add(0x60, mload(uri)))
             }
         }
-        // `implementsDN404()`.
+        // `implementsSF404()`.
         if (fnSelector == 0xb7a94eb8) {
             _return(1);
         }
@@ -1168,8 +1168,8 @@ abstract contract DN404 {
     /// @dev Fallback function for calls from mirror NFT contract.
     /// Override this if you need to implement your custom
     /// fallback with utilities like Solady's `LibZip.cdFallback()`.
-    /// And always remember to always wrap the fallback with `dn404Fallback`.
-    fallback() external payable virtual dn404Fallback {
+    /// And always remember to always wrap the fallback with `SF404Fallback`.
+    fallback() external payable virtual SF404Fallback {
         revert FnSelectorNotRecognized(); // Not mandatory. Just for quality of life.
     }
 

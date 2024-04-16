@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "./MockDN404.sol";
+import "./MockSF404.sol";
 
-contract MockDN404CustomUnit is MockDN404 {
+contract MockSF404CustomUnit is MockSF404 {
     uint256 public unit;
 
     function _unit() internal view virtual override returns (uint256) {

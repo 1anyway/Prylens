@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "../DN404.sol";
-import "../DN404Mirror.sol";
+import "../SF404.sol";
+import "../SF404Mirror.sol";
 import {LibString} from "solady/utils/LibString.sol";
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 
 /**
- * @title SimpleDN404
- * @notice Sample DN404 contract that demonstrates the owner selling fungible tokens.
+ * @title SimpleSF404
+ * @notice Sample SF404 contract that demonstrates the owner selling fungible tokens.
  * When a user has at least one base unit (10^18) amount of tokens, they will automatically receive an NFT.
  * NFTs are minted as an address accumulates each base unit amount of tokens.
  */
-contract SimpleDN404 is DN404 {
+contract SimpleSF404 is SF404 {
     string private _name;
     string private _symbol;
     string private _baseURI;
@@ -26,8 +26,8 @@ contract SimpleDN404 is DN404 {
         _name = name_;
         _symbol = symbol_;
 
-        address mirror = address(new DN404Mirror(msg.sender));
-        _initializeDN404(initialTokenSupply, initialSupplyOwner, mirror);
+        address mirror = address(new SF404Mirror(msg.sender));
+        _initializeSF404(initialTokenSupply, initialSupplyOwner, mirror);
     }
 
     function name() public view override returns (string memory) {
