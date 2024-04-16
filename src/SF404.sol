@@ -4,14 +4,6 @@ pragma solidity ^0.8.4;
 /// @title SF404
 /// @notice SF404 is a hybrid ERC20 and ERC721 implementation that mints
 /// and burns NFTs based on an account's ERC20 token balance.
-///
-/// @author vectorized.eth (@optimizoor)
-/// @author Quit (@0xQuit)
-/// @author Michael Amadi (@AmadiMichaels)
-/// @author cygaar (@0xCygaar)
-/// @author Thomas (@0xjustadev)
-/// @author Harrison (@PopPunkOnChain)
-///
 /// @dev Note:
 /// - The ERC721 data is stored in this base SF404 contract, however a
 ///   SF404Mirror contract ***MUST*** be deployed and linked during

@@ -4,14 +4,6 @@ pragma solidity ^0.8.4;
 /// @title SF404Mirror
 /// @notice SF404Mirror provides an interface for interacting with the
 /// NFT tokens in a SF404 implementation.
-///
-/// @author vectorized.eth (@optimizoor)
-/// @author Quit (@0xQuit)
-/// @author Michael Amadi (@AmadiMichaels)
-/// @author cygaar (@0xCygaar)
-/// @author Thomas (@0xjustadev)
-/// @author Harrison (@PopPunkOnChain)
-///
 /// @dev Note:
 /// - The ERC721 data is stored in the base SF404 contract.
 contract SF404Mirror {
